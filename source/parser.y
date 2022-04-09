@@ -440,7 +440,7 @@ int main(int argc, char** argv) {
 	if(!feof (yyin)) {
 		yyparse();
 	}
-	return yyparse();
+	return 0;
 }
 yyerror(s)
 char *s;
