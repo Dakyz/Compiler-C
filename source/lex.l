@@ -112,6 +112,11 @@ L?\"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
 "|"			{ count(); return('|'); }
 "?"			{ count(); return('?'); }
 
+<<EOF>> {
+	printf("\n");
+	exit(0);
+}
+
 [ \t\v\n\f]		{ count(); }
 .			{ /* ignore bad characters */ }
 

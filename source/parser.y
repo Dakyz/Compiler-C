@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 
+extern FILE* yyin;
 extern char yytext[];
 extern int column;
 int main();
@@ -423,8 +424,22 @@ function_definition
 	;
 
 %%
-
-int main() {
+int main(int argc, char** argv) {
+	char str[256] = {'\0'};
+	if (argc < 2){
+		fprintf(stderr, "usage: ./a.out filename\n");
+		return -1;
+	}
+	
+	yyin = fopen(*(argv + 1),"r");
+	if (!yyin){
+		fprintf(stderr, "file %s doesn't exist\n", *(argv + 1));
+		return -1;
+	}
+	
+	if(!feof (yyin)) {
+		yyparse();
+	}
 	return yyparse();
 }
 yyerror(s)
