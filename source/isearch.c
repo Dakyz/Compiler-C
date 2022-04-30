@@ -1,9 +1,9 @@
-#include <isearch.h>
-struct ielem* add_elem(struct ielem* root, char* name, enum types type) //добавление новой переменной
+#include "isearch.h"
+struct idElem* add_elem(struct idElem* root, char* name, enum types type) //добавление новой переменной
 {
 	if (strlen(root->name) == 0)return init(root, name);
-	struct ielem* current = (struct ielem*)malloc(sizeof(struct ielem));
-	struct ielem* t = (struct ielem*)malloc(sizeof(struct ielem));
+	struct idElem* current = (struct idElem*)malloc(sizeof(struct idElem));
+	struct idElem* t = (struct idElem*)malloc(sizeof(struct idElem));
 	t = root;
 	strcpy(current->name, name);
 	current->type = type;
@@ -14,7 +14,7 @@ struct ielem* add_elem(struct ielem* root, char* name, enum types type) //добавл
 	return t;
 }
 
-struct ielem* init(struct ielem* root, char* name, enum types type) //инициализация первой переменной
+struct idElem* init(struct idElem* root, char* name, enum types type) //инициализация первой переменной
 {
 	root->type = type;
 	strcpy(root->name, name);
@@ -23,12 +23,12 @@ struct ielem* init(struct ielem* root, char* name, enum types type) //инициализа
 	return root;
 }
 
-struct ielem* del_elem(struct ielem* root, char* name) //удаление элемента, возвращаемое значение - был удален или нет
+struct idElem* del_elem(struct idElem* root, char* name) //удаление элемента, возвращаемое значение - был удален или нет
 {
 	if (strlen(root->name) == 0) return root;
 	if (!isearch(root, name)) return root;
 	while (strcmp(root->name, name)) root = root->next; //дошли до того что нужно выпилить
-	struct ielem* t = (struct ielem*)malloc(sizeof(struct ielem));
+	struct idElem* t = (struct idElem*)malloc(sizeof(struct idElem));
 	t = root; //запоминаем что над удалить
 	if (root->prev != NULL)
 	{
@@ -51,14 +51,14 @@ struct ielem* del_elem(struct ielem* root, char* name) //удаление элемента, возв
 	return root;
 }
 
-bool isearch(struct ielem* root, char* name)
+bool isearch(struct idElem* root, char* name)
 {
 	while (strcmp(root->name, name) && root->next!=NULL) root = root->next;
 	if (!strcmp(root->name, name)) return 1;
 	else return 0;
 }
 
-void printo(struct ielem* root) //для отладки
+void printo(struct idElem* root) //для отладки
 {
 	printf("%s", root->name);
 	while (root->next != NULL)

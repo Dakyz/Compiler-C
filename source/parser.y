@@ -1,12 +1,23 @@
 %{
 #include <stdio.h>
+#include "isearch.h"
+List<struct idElem> elements = 
+	List<struct idElem>();
 
 extern FILE* yyin;
 extern char yytext[];
 extern int column;
-int main();
-%}
+int main(int argc, char** argv);
+void yyerror(const char *s);
+extern "C" {
+    int yylex(void);
+}
 
+%}
+%union{
+	char identifier[256];
+	int number;
+}
 %token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -20,6 +31,7 @@ int main();
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
 %start translation_unit
+
 %%
 
 primary_expression
@@ -167,9 +179,13 @@ declaration
 declaration_specifiers
 	: storage_class_specifier
 	| storage_class_specifier declaration_specifiers
-	| type_specifier
+	| type_specifier {
+		strncpy(elements.localTmp->name, yylval.identifier, 256);
+		elements.push_back();
+		elements.clear();
+	}
 	| type_specifier declaration_specifiers
-	| type_qualifier
+	| type_qualifier 
 	| type_qualifier declaration_specifiers
 	;
 
@@ -191,11 +207,14 @@ storage_class_specifier
 	| REGISTER
 	;
 
-type_specifier
-	: VOID
+type_specifier 
+	: VOID 
 	| CHAR
 	| SHORT
-	| INT
+	| INT {
+		elements.localTmp->type = int_;
+		printf("%s\n", yylval.identifier);
+	}
 	| LONG
 	| FLOAT
 	| DOUBLE
@@ -442,9 +461,8 @@ int main(int argc, char** argv) {
 	}
 	return 0;
 }
-yyerror(s)
-char *s;
+
+void yyerror(const char *s)
 {
-	fflush(stdout);
 	printf("\n%*s\n%*s\n", column, "^", column, s);
 }

@@ -1,21 +1,24 @@
 #include <stdio.h>
 #include <string.h>
-bool isearch(struct ielem* root, char* name); //существует ли данный идентификатор
-struct ielem* init(struct ielem* root, char* name, enum types type); //инициализация списка (первая переменная)
-struct ielem* add_elem(struct ielem* root, char* name, enum types type); //добавление элемента в список
-struct ielem* del_elem(struct ielem* root, char* name); //удаление элемента
-void printo(struct ielem* root); //вывод всех переменных потом удалить ее можно
+#include <algorithm>
+#include <iostream>
+#include <list>
+
+/*bool isearch(struct idElem* root, char* name); //существует ли данный идентификатор
+struct idElem* init(struct idElem* root, char* name, enum types type); //инициализация списка (первая переменная)
+struct idElem* add_elem(struct idElem* root, char* name, enum types type); //добавление элемента в список
+struct idElem* del_elem(struct idElem* root, char* name); //удаление элемента
+void printo(struct idElem* root); //вывод всех переменных потом удалить ее можно*/
 //void deinit(); //освобождение памяти не помню надо или нет
 
-struct ielem
+struct idElem
 {
 	char name[256]; //идентификатор
-	enum types type; //идентификатор типа
-	struct ielem* next;
-	struct ielem* prev;
+	int type; //идентификатор типа
+	bool initialized;
 };
 
-enum types //допустимые типы
+/*enum types //допустимые типы
 {
 	"int" = 0, "signed" = 0, "signed int" = 0,
 	"char" = 1, 
@@ -32,4 +35,33 @@ enum types //допустимые типы
 	"double" = 12,
 	"long double" = 13
 	//struct enum union пашол нахер хз че еще с указателями ссылками
+};*/
+
+enum types {
+	int_,
+	char_,
+	float_,
+	struct_,
+	union_,
+	enum_
+};
+
+template<class T>
+class List 
+{
+	std::list<T> members;
+
+public:
+	T* localTmp;
+
+	List() : members() {
+		this->localTmp = (T*)calloc(sizeof(T), sizeof(T));
+	}
+	~List() {
+		free(this->localTmp);
+	}
+
+	bool isFind(char* id);
+	void clear();
+	void push_back();
 };

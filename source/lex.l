@@ -7,13 +7,23 @@ IS			(u|U|l|L)*
 
 %{
 #include <stdio.h>
+#include "isearch.h"
+
 #include "y.tab.h"
-	struct list {
-		
-		char * identefier;
-		struct list * next;
-	} *root, *cursor;
 void count();
+void comment();
+int check_type();
+extern "C" {
+    int yylex(void);
+}
+extern "C" int yywrap ( void );
+#ifdef __cplusplus
+static int yyinput (void );
+static int (*input) (void) = yyinput;
+#else
+static int input (void );
+#endif
+
 %}
 
 %%
@@ -117,13 +127,13 @@ L?\"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
 
 %%
 
-yywrap()
+int yywrap()
 {
 	return(1);
 }
 
 
-comment()
+void comment()
 {
 	char c, c1;
 
@@ -147,7 +157,7 @@ int column = 0;
 void count()
 {
 	int i;
-
+	sscanf(yytext, "%s", yylval.identifier);
 	for (i = 0; yytext[i] != '\0'; i++)
 		if (yytext[i] == '\n')
 			column = 0;
@@ -156,13 +166,24 @@ void count()
 		else
 			column++;
 
-	ECHO;
+	//ECHO;
 }
 
 
 int check_type()
 {
-	//add identifer check
+/*
+* pseudo code --- this is what it should check
+*
+*	if (yytext == type_name)
+*		return(TYPE_NAME);
+*
+*	return(IDENTIFIER);
+*/
+
+/*
+*	it actually will only return IDENTIFIER
+*/
 
 	return(IDENTIFIER);
 }
