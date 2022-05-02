@@ -8,17 +8,19 @@ IS			(u|U|l|L)*
 %{
 #include <stdio.h>
 #include "y.tab.h"
+
 	struct list {
 		
 		char * identefier;
 		struct list * next;
 	} *root, *cursor;
 void count();
+//{ commentt(); }
 %}
-
 %%
-"/*"			{ comment(); }
 
+"/\*"			{ comment(); }
+"//"			{ commentt(); }
 "auto"			{ count(); return(AUTO); }
 "break"			{ count(); return(BREAK); }
 "case"			{ count(); return(CASE); }
@@ -123,24 +125,30 @@ yywrap()
 }
 
 
-comment()
+int comment()
 {
 	char c, c1;
-
 loop:
-	while ((c = input()) != '*' && c != 0)
-		putchar(c);
-
-	if ((c1 = input()) != '/' && c != 0)
+	while ((c = input()) != '*' && c != 0);
+	if ((c1 = input()) == '/' && c != 0) return (0);
+	else 
 	{
-		unput(c1);
+		if(!c1) return (0);
 		goto loop;
 	}
-
-	if (c != 0)
-		putchar(c1);
 }
 
+int commentt()
+{
+	char c, c1='\0', c2;
+lop:
+	while ((c = input()) != '\n' && c != 0)
+	{
+		c2 = c1;
+		c1 = c;
+	}
+	if(c2=='\\') goto lop;
+}
 
 int column = 0;
 
