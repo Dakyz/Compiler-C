@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
-#include "isearch.h"
+#include "list.h"
+
 List<struct idElem> elements = 
 	List<struct idElem>();
 
@@ -208,17 +209,28 @@ storage_class_specifier
 	;
 
 type_specifier 
-	: VOID 
-	| CHAR
-	| SHORT
+	: VOID {
+		elements.localTmp->type = void_;
+	}
+	| CHAR {
+		elements.localTmp->type = char_;
+	}
+	| SHORT {
+		elements.localTmp->type = int_;
+	}
 	| INT {
 		elements.localTmp->type = int_;
-		printf("%s\n", yylval.identifier);
 	}
-	| LONG
-	| FLOAT
-	| DOUBLE
-	| SIGNED
+	| LONG {
+		elements.localTmp->type = int_;
+	}
+	| FLOAT {
+		elements.localTmp->type = float_;
+	}
+	| DOUBLE {
+		elements.localTmp->type = float_;
+	}
+	| SIGNED 
 	| UNSIGNED
 	| struct_or_union_specifier
 	| enum_specifier
@@ -459,6 +471,7 @@ int main(int argc, char** argv) {
 	if(!feof (yyin)) {
 		yyparse();
 	}
+	elements.print();
 	return 0;
 }
 

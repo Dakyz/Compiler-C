@@ -1,8 +1,10 @@
 cd source
 yacc -d parser.y
 lex lex.l
-g++ -c -fPIC -Wall list.cpp
-ar rvs liblist.a list.o
-gcc -shared -o liblist.so list.o -Wl,--whole-archive liblist.a -Wl,--no-whole-archive
-g++ -o output -Wall liblist.a y.tab.c lex.yy.c
+g++ -o output -std=c++17 -Wall y.tab.c lex.yy.c
+rm y.tab.c
+rm y.tab.h
+rm lex.yy.c
+cp output ../
+rm output
 cd ..
