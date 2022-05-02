@@ -52,8 +52,8 @@ List<T>::~List() {
 template<class T>
 inline bool List<T>::isFind(char* id)
 {
-	for (auto element = members->begin();
-		element != members->end(); ++element) {
+	for (auto element = members.begin();
+		element != members.end(); ++element) {
 		if (!strcmp((*element)->name, id)) {
 			return true;
 		}
@@ -79,6 +79,8 @@ void List<T>::print() {
 
 	for (auto element = members.begin();
 		element != members.end(); ++element) {
-		std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << std::endl;
+		std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
+			<< ((*element)->initialized ? "initialized" : "not initialized")
+			<< std::endl;
 	}
 }

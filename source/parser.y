@@ -4,6 +4,7 @@
 
 List<struct idElem> elements = 
 	List<struct idElem>();
+int gType = 0;
 
 extern FILE* yyin;
 extern char yytext[];
@@ -187,13 +188,21 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator
-	| init_declarator_list ',' init_declarator
+	: init_declarator {
+		elements.push_back();
+		elements.clear();
+	}
+	| init_declarator_list ',' init_declarator {
+		elements.push_back();
+		elements.clear();
+	}
 	;
 
 init_declarator
 	: declarator
-	| declarator '=' initializer
+	| declarator '=' {
+		elements.localTmp->initialized = true;
+	} initializer
 	;
 
 storage_class_specifier
@@ -206,25 +215,25 @@ storage_class_specifier
 
 type_specifier 
 	: VOID {
-		elements.localTmp->type = void_;
+		gType = void_;
 	}
 	| CHAR {
-		elements.localTmp->type = char_;
+		gType = char_;
 	}
 	| SHORT {
-		elements.localTmp->type = int_;
+		gType = int_;
 	}
 	| INT {
-		elements.localTmp->type = int_;
+		gType = int_;
 	}
 	| LONG {
-		elements.localTmp->type = int_;
+		gType = int_;
 	}
 	| FLOAT {
-		elements.localTmp->type = float_;
+		gType = float_;
 	}
 	| DOUBLE {
-		elements.localTmp->type = float_;
+		gType = float_;
 	}
 	| SIGNED 
 	| UNSIGNED
@@ -240,8 +249,12 @@ struct_or_union_specifier
 	;
 
 struct_or_union
-	: STRUCT
-	| UNION
+	: STRUCT { 
+		gType = struct_;
+	}
+	| UNION {
+		gType = union_;
+	}
 	;
 
 struct_declaration_list
@@ -299,9 +312,12 @@ declarator
 
 direct_declarator
 	: IDENTIFIER   {
+		if (elements.isFind(yylval.identifier)) {
+			yyerror("multiple definition");
+			exit(0);
+		}
 		strncpy(elements.localTmp->name, yylval.identifier, 256);
-		elements.push_back();
-		elements.clear();
+		elements.localTmp->type = gType;
 	}
 	| '(' declarator ')'
 	| direct_declarator '[' constant_expression ']'
@@ -477,5 +493,5 @@ int main(int argc, char** argv) {
 
 void yyerror(const char *s)
 {
-	printf("\n%*s\n%*s\n", column, "^", column, s);
+	printf("%s\n", s);
 }
