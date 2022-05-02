@@ -180,11 +180,7 @@ declaration
 declaration_specifiers
 	: storage_class_specifier
 	| storage_class_specifier declaration_specifiers
-	| type_specifier {
-		strncpy(elements.localTmp->name, yylval.identifier, 256);
-		elements.push_back();
-		elements.clear();
-	}
+	| type_specifier
 	| type_specifier declaration_specifiers
 	| type_qualifier 
 	| type_qualifier declaration_specifiers
@@ -298,11 +294,15 @@ type_qualifier
 
 declarator
 	: pointer direct_declarator
-	| direct_declarator
+	| direct_declarator 
 	;
 
 direct_declarator
-	: IDENTIFIER
+	: IDENTIFIER   {
+		strncpy(elements.localTmp->name, yylval.identifier, 256);
+		elements.push_back();
+		elements.clear();
+	}
 	| '(' declarator ')'
 	| direct_declarator '[' constant_expression ']'
 	| direct_declarator '[' ']'
