@@ -496,6 +496,6 @@ int main(int argc, char** argv) {
 
 void yyerror(const char *s)
 {
-	printf("%d: %s\n", line, s);
+	printf("line %d: %s\n", line, s);
 	exit(0);
 }

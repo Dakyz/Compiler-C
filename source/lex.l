@@ -29,6 +29,7 @@ void line_comment();
 %}
 %%
 "#include"[ \t]*({LOCAL}|{SYSTEM}) {}
+"#define "		{ line_comment(); }
 "/\*"			{ comment(); }
 "//"			{ line_comment(); }
 "auto"			{ count(); return(AUTO); }
