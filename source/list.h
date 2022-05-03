@@ -71,6 +71,7 @@ void List<T>::push_back() {
 	T* ptr = (T*)calloc(sizeof(T), sizeof(T));
 	strncpy(ptr->name, localTmp->name, 256);
 	ptr->type = localTmp->type;
+	ptr->initialized = localTmp->initialized;
 	members.push_back(ptr);
 }
 

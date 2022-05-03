@@ -4,7 +4,8 @@ H			[a-fA-F0-9]
 E			[Ee][+-]?{D}+
 FS			(f|F|l|L)
 IS			(u|U|l|L)*
-
+LOCAL		"\""[a-zA-Z0-9_.]*"\""
+SYSTEM		<[a-zA-Z0-9_.]*>
 %{
 #include <stdio.h>
 
@@ -15,6 +16,7 @@ int check_type();
 extern "C" {
     int yylex(void);
 }
+extern void new_line();
 extern "C" int yywrap ( void );
 #ifdef __cplusplus
 static int yyinput (void);
@@ -26,7 +28,7 @@ void line_comment();
 
 %}
 %%
-
+"#include"[ \t]*({LOCAL}|{SYSTEM}) {}
 "/\*"			{ comment(); }
 "//"			{ line_comment(); }
 "auto"			{ count(); return(AUTO); }
@@ -121,8 +123,8 @@ L?\"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
 "^"			{ count(); return('^'); }
 "|"			{ count(); return('|'); }
 "?"			{ count(); return('?'); }
-
-[ \t\v\n\f]		{ count(); }
+[\n] {new_line();}
+[ \t\v\f]		{ count(); }
 .			{ /* ignore bad characters */ }
 
 %%

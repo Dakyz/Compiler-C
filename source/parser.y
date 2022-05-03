@@ -5,7 +5,8 @@
 List<struct idElem> elements = 
 	List<struct idElem>();
 int gType = 0;
-
+int line = 0;
+void new_line() {++line;}
 extern FILE* yyin;
 extern char yytext[];
 extern int column;
@@ -314,7 +315,6 @@ direct_declarator
 	: IDENTIFIER   {
 		if (elements.isFind(yylval.identifier)) {
 			yyerror("multiple definition");
-			exit(0);
 		}
 		strncpy(elements.localTmp->name, yylval.identifier, 256);
 		elements.localTmp->type = gType;
@@ -459,8 +459,12 @@ translation_unit
 	;
 
 external_declaration
-	: function_definition
-	| declaration
+	: function_definition {
+		
+	}
+	| declaration {
+		
+	}
 	;
 
 function_definition
@@ -492,5 +496,6 @@ int main(int argc, char** argv) {
 
 void yyerror(const char *s)
 {
-	printf("%s\n", s);
+	printf("%d: %s\n", line, s);
+	exit(0);
 }
