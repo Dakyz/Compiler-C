@@ -472,7 +472,6 @@ function_definition
 
 %%
 int main(int argc, char** argv) {
-	char str[256] = {'\0'};
 	if (argc < 2){
 		fprintf(stderr, "usage: %s filename\n", *argv);
 		return -1;
