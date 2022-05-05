@@ -10,6 +10,7 @@ struct idElem
 	char name[256]; //идентификатор
 	int type; //идентификатор типа
 	bool initialized;
+	bool callable;
 };
 
 enum types {
@@ -25,6 +26,7 @@ enum types {
 template<class T>
 class List 
 {
+	std::list<T*> global;
 	std::list<T*> members;
 
 public:
@@ -35,7 +37,8 @@ public:
 
 	bool isFind(char* id);
 	void clear();
-	void push_back();
+	void clear_members();
+	void push_back(bool isGlobal);
 	void print();
 };
 
@@ -49,6 +52,13 @@ List<T>::~List() {
 	members.clear();
 	free(this->localTmp);
 }
+
+template<class T>
+void List<T>::clear_members() {
+	
+	members.clear();
+}
+
 template<class T>
 inline bool List<T>::isFind(char* id)
 {
@@ -58,6 +68,14 @@ inline bool List<T>::isFind(char* id)
 			return true;
 		}
 	}
+
+	for (auto element = global.begin();
+		element != global.end(); ++element) {
+		if (!strcmp((*element)->name, id)) {
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -66,13 +84,15 @@ void List<T>::clear() {
 	memset(localTmp, '\0', sizeof(T));
 }
 template<class T>
-void List<T>::push_back() {
+void List<T>::push_back(bool isGlobal) {
 
 	T* ptr = (T*)calloc(sizeof(T), sizeof(T));
 	strncpy(ptr->name, localTmp->name, 256);
 	ptr->type = localTmp->type;
 	ptr->initialized = localTmp->initialized;
-	members.push_back(ptr);
+	ptr->callable = localTmp->callable;
+	isGlobal ? global.push_back(ptr) :
+		members.push_back(ptr);
 }
 
 template<class T>
@@ -81,7 +101,18 @@ void List<T>::print() {
 	for (auto element = members.begin();
 		element != members.end(); ++element) {
 		std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
-			<< ((*element)->initialized ? "initialized" : "not initialized")
+			<< ((*element)->initialized ? "initialized" : "not initialized") << ", "
+			<< ((*element)->callable ? "callable" : "not callable")
+			<< std::endl;
+	}
+
+	std::cout << "global" << std::endl;
+
+	for (auto element = global.begin();
+		element != global.end(); ++element) {
+		std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
+			<< ((*element)->initialized ? "initialized" : "not initialized") << ", "
+			<< ((*element)->callable ? "callable" : "not callable")
 			<< std::endl;
 	}
 }

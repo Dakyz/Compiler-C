@@ -5,6 +5,7 @@
 List<struct idElem> elements = 
 	List<struct idElem>();
 int gType = 0;
+bool gGlobal = true;
 int line = 0;
 void new_line() {++line;}
 extern FILE* yyin;
@@ -190,11 +191,11 @@ declaration_specifiers
 
 init_declarator_list
 	: init_declarator {
-		elements.push_back();
+		elements.push_back(gGlobal);
 		elements.clear();
 	}
 	| init_declarator_list ',' init_declarator {
-		elements.push_back();
+		elements.push_back(gGlobal);
 		elements.clear();
 	}
 	;
@@ -322,9 +323,15 @@ direct_declarator
 	| '(' declarator ')'
 	| direct_declarator '[' constant_expression ']'
 	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' identifier_list ')'
-	| direct_declarator '(' ')'
+	| direct_declarator '(' parameter_type_list ')' {
+		elements.localTmp->callable = true;
+	}
+	| direct_declarator '(' identifier_list ')' {
+		elements.localTmp->callable = true;
+	}
+	| direct_declarator '(' ')' {
+		elements.localTmp->callable = true;
+	}
 	;
 
 pointer
@@ -460,18 +467,28 @@ translation_unit
 
 external_declaration
 	: function_definition {
-		
+		gGlobal = true;
+		printf("function_definition\n");
 	}
-	| declaration {
-		
+	| declaration  {
+		printf("declaration\n");
+		gGlobal = true;
 	}
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
-	| declarator declaration_list compound_statement
-	| declarator compound_statement
+	: declaration_specifiers declarator {
+		gGlobal = false;
+	} declaration_list compound_statement
+	| declaration_specifiers declarator {
+		gGlobal = false;
+	} compound_statement
+	| declarator {
+		gGlobal = false;
+	} declaration_list compound_statement
+	| declarator  {
+		gGlobal = false;
+	} compound_statement
 	;
 
 %%
