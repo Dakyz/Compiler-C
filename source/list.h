@@ -35,11 +35,12 @@ public:
 	List();
 	~List();
 
-	bool isFind(char* id);
+	bool isFind(char* id, int type);
 	void clear();
 	void clear_members();
 	void push_back(bool isGlobal);
 	void print();
+	void init_last();
 };
 
 template<class T>
@@ -60,19 +61,26 @@ void List<T>::clear_members() {
 }
 
 template<class T>
-inline bool List<T>::isFind(char* id)
+void List<T>::init_last() {
+	
+}
+
+template<class T>
+inline bool List<T>::isFind(char* id, int type)
 {
 	for (auto element = members.begin();
 		element != members.end(); ++element) {
 		if (!strcmp((*element)->name, id)) {
-			return true;
+			if ((*element)->type != type || !(*element)->callable)
+				return true;
 		}
 	}
 
 	for (auto element = global.begin();
 		element != global.end(); ++element) {
 		if (!strcmp((*element)->name, id)) {
-			return true;
+			if ((*element)->type != type || !(*element)->callable)
+				return true;
 		}
 	}
 

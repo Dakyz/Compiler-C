@@ -4,9 +4,10 @@
 
 List<struct idElem> elements = 
 	List<struct idElem>();
+bool isFuncPushed = false;
 int gType = 0;
 bool gGlobal = true;
-int line = 0;
+int line = 1;
 void new_line() {++line;}
 extern FILE* yyin;
 extern char yytext[];
@@ -191,8 +192,10 @@ declaration_specifiers
 
 init_declarator_list
 	: init_declarator {
-		elements.push_back(gGlobal);
-		elements.clear();
+		if (!isFuncPushed) {
+			elements.push_back(gGlobal);
+			elements.clear();
+		}
 	}
 	| init_declarator_list ',' init_declarator {
 		elements.push_back(gGlobal);
@@ -314,7 +317,7 @@ declarator
 
 direct_declarator
 	: IDENTIFIER   {
-		if (elements.isFind(yylval.identifier)) {
+		if (elements.isFind(yylval.identifier, gType)) {
 			yyerror("multiple definition");
 		}
 		strncpy(elements.localTmp->name, yylval.identifier, 256);
@@ -342,6 +345,7 @@ direct_declarator
 		elements.push_back(gGlobal);
 		elements.clear();
 		gGlobal = false;
+		isFuncPushed = true;
 	} ')'
 	;
 
@@ -364,14 +368,22 @@ parameter_type_list
 	;
 
 parameter_list
-	: parameter_declaration
-	| parameter_list ',' parameter_declaration
+	: parameter_declaration  {
+		elements.localTmp->initialized = true;
+		elements.push_back(gGlobal);
+		elements.clear();
+	}
+	| parameter_list ',' parameter_declaration  {
+		elements.localTmp->initialized = true;
+		elements.push_back(gGlobal);
+		elements.clear();
+	}
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
-	| declaration_specifiers abstract_declarator
-	| declaration_specifiers
+	: declaration_specifiers declarator 
+	| declaration_specifiers abstract_declarator 
+	| declaration_specifiers 
 	;
 
 identifier_list
@@ -481,9 +493,11 @@ translation_unit
 external_declaration
 	: function_definition {
 		gGlobal = true;
+		isFuncPushed = false;
 	}
 	| declaration  {
 		gGlobal = true;
+		isFuncPushed = false;
 	}
 	;
 
