@@ -323,15 +323,26 @@ direct_declarator
 	| '(' declarator ')'
 	| direct_declarator '[' constant_expression ']'
 	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')' {
+	| direct_declarator '('  {
 		elements.localTmp->callable = true;
+		elements.push_back(gGlobal);
+		elements.clear();
+		gGlobal = false;
 	}
-	| direct_declarator '(' identifier_list ')' {
+	parameter_type_list ')'
+	| direct_declarator '('  {
 		elements.localTmp->callable = true;
+		elements.push_back(gGlobal);
+		elements.clear();
+		gGlobal = false;
 	}
-	| direct_declarator '(' ')' {
+	identifier_list ')'
+	| direct_declarator '('  {
 		elements.localTmp->callable = true;
-	}
+		elements.push_back(gGlobal);
+		elements.clear();
+		gGlobal = false;
+	} ')'
 	;
 
 pointer
@@ -418,7 +429,9 @@ labeled_statement
 	;
 
 compound_statement
-	: '{' '}'
+	: '{' '}' {
+		
+	}
 	| '{' statement_list '}'
 	| '{' declaration_list '}'
 	| '{' declaration_list statement_list '}'
@@ -468,10 +481,8 @@ translation_unit
 external_declaration
 	: function_definition {
 		gGlobal = true;
-		printf("function_definition\n");
 	}
 	| declaration  {
-		printf("declaration\n");
 		gGlobal = true;
 	}
 	;
