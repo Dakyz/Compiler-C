@@ -19,6 +19,7 @@ extern "C" {
 }
 extern void new_line();
 extern bool is_type_name(char * id);
+extern bool is_find(char * id);
 extern "C" int yywrap ( void );
 #ifdef __cplusplus
 static int yyinput (void);
@@ -111,9 +112,9 @@ L?\"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
 ("}"|"%>")		{ count(); return('}'); }
 ","			{ count(); return(','); }
 ":"			{ count(); return(':'); }
-"="			{ count(); return('='); }
-"("			{ count(); return('('); }
-")"			{ count(); return(')'); }
+"="			{ return('='); }
+"("			{ return('('); }
+")"			{ return(')'); }
 ("["|"<:")		{ count(); return('['); }
 ("]"|":>")		{ count(); return(']'); }
 "."			{ count(); return('.'); }

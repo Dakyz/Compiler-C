@@ -89,15 +89,14 @@ inline bool List<T>::is_find(char* id, bool isGlobal)
 	for (auto element = members.begin();
 		element != members.end(); ++element) {
 		if (!strcmp((*element)->name, id)) {
-			if (!(*element)->callable && isGlobal)
-				return true;
+			return true;
 		}
 	}
 
 	for (auto element = global.begin();
 		element != global.end(); ++element) {
 		if (!strcmp((*element)->name, id)) {
-			if (!(*element)->callable && isGlobal)
+			if (!(*element)->callable || !isGlobal)
 				return true;
 		}
 	}
@@ -162,14 +161,15 @@ void List<T>::print() {
 			<< ((*element)->callable ? "callable" : "not callable")
 			<< std::endl;
 	}
+	std::cout 
+		<< '\n' << '\n' << '\n' << '\n' << '\n';
+	//std::cout << "global" << std::endl;
 
-	std::cout << "global" << std::endl;
-
-	for (auto element = global.begin();
-		element != global.end(); ++element) {
-		std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
-			<< ((*element)->initialized ? "initialized" : "not initialized") << ", "
-			<< ((*element)->callable ? "callable" : "not callable")
-			<< std::endl;
-	}
+	//for (auto element = global.begin();
+	//	element != global.end(); ++element) {
+	//	std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
+	//		<< ((*element)->initialized ? "initialized" : "not initialized") << ", "
+	//		<< ((*element)->callable ? "callable" : "not callable")
+	//		<< std::endl;
+	//}
 }

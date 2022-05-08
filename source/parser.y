@@ -18,6 +18,7 @@ void yyerror(const char *s);
 extern "C" {
     int yylex(void);
 }
+bool is_find(char * id);
 bool is_type_name(char * id);
 %}
 %union{
@@ -42,15 +43,16 @@ bool is_type_name(char * id);
 
 primary_expression
 	: IDENTIFIER {
-		if (!elements.is_find(yylval.identifier, gGlobal)) {
-			char tmp[400];
-			snprintf(tmp, 400, "implicit declaration %s", yylval.identifier);
-		}
-		if (!elements.is_init(yylval.identifier)) {
-			fprintf(stderr, "\033[0;35m");
-			fprintf(stderr, "warning %d: %s not initialized\n", line, yylval.identifier);
-			fprintf(stderr, "\033[0m");
-		}
+	if (!elements.is_find(yylval.identifier, gGlobal)) {
+		char tmp[400];
+		snprintf(tmp, 400, "implicit declaration %s", yylval.identifier);
+		yyerror(tmp);
+	}
+	if (!elements.is_init(yylval.identifier)) {
+		fprintf(stderr, "\033[0;35m");
+		fprintf(stderr, "warning %d: %s not initialized\n", line, yylval.identifier);
+		fprintf(stderr, "\033[0m");
+	}
 	}
 	| CONSTANT
 	| STRING_LITERAL
@@ -474,6 +476,7 @@ func_definition
 	| statement_list '}'
 	| declaration_list '}'
 	| declaration_list statement_list '}'
+	;
 
 declaration_list
 	: declaration
@@ -564,7 +567,6 @@ int main(int argc, char** argv) {
 	if(!feof (yyin)) {
 		yyparse();
 	}
-	elements.print();
 	return 0;
 }
 
@@ -578,4 +580,8 @@ void yyerror(const char *s)
 
 bool is_type_name(char * id) {
 	return elements.is_type(id);
+}
+
+bool is_find(char * id) {
+	return elements.is_find(id, gGlobal);
 }
