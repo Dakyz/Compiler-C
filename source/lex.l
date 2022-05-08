@@ -11,12 +11,14 @@ SYSTEM		<[a-zA-Z0-9_.]*>
 
 #include "y.tab.h"
 void count();
+void check();
 int comment();
 int check_type();
 extern "C" {
     int yylex(void);
 }
 extern void new_line();
+extern bool is_type_name(char * id);
 extern "C" int yywrap ( void );
 #ifdef __cplusplus
 static int yyinput (void);
@@ -28,10 +30,14 @@ void line_comment();
 
 %}
 %%
-"#include"[ \t]*({LOCAL}|{SYSTEM}) {}
-"#define"		{ line_comment(); }
+"#".* {}
 "/\*"			{ comment(); }
 "//"			{ line_comment(); }
+"__inline"
+"__extension__"
+"__restrict"
+"__attribute__"[^;]*";" { check(); return ';';}
+"__asm__"[^;]*";" { check(); return ';';}
 "auto"			{ count(); return(AUTO); }
 "break"			{ count(); return(BREAK); }
 "case"			{ count(); return(CASE); }
@@ -182,18 +188,16 @@ void count()
 
 int check_type()
 {
-/*
-* pseudo code --- this is what it should check
-*
-*	if (yytext == type_name)
-*		return(TYPE_NAME);
-*
-*	return(IDENTIFIER);
-*/
-
-/*
-*	it actually will only return IDENTIFIER
-*/
-
+	if (is_type_name(yytext)) {
+		return(TYPE_NAME); 
+	}
 	return(IDENTIFIER);
+}
+
+void check() {
+	for (size_t q = 0; q < strlen(yytext); ++q) {
+		if (*(yytext + q) == '\n') {
+			new_line();	
+		}
+	}
 }

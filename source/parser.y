@@ -6,6 +6,7 @@ List<struct idElem> elements =
 	List<struct idElem>();
 bool isFuncPushed = false;
 int gType = 0;
+bool isType = false;
 bool gGlobal = true;
 int line = 1;
 void new_line() {++line;}
@@ -17,7 +18,7 @@ void yyerror(const char *s);
 extern "C" {
     int yylex(void);
 }
-
+bool is_type_name(char * id);
 %}
 %union{
 	char identifier[256];
@@ -40,7 +41,17 @@ extern "C" {
 %%
 
 primary_expression
-	: IDENTIFIER
+	: IDENTIFIER {
+		if (!elements.is_find(yylval.identifier, gGlobal)) {
+			char tmp[400];
+			snprintf(tmp, 400, "implicit declaration %s", yylval.identifier);
+		}
+		if (!elements.is_init(yylval.identifier)) {
+			fprintf(stderr, "\033[0;35m");
+			fprintf(stderr, "warning %d: %s not initialized\n", line, yylval.identifier);
+			fprintf(stderr, "\033[0m");
+		}
+	}
 	| CONSTANT
 	| STRING_LITERAL
 	| '(' expression ')'
@@ -192,7 +203,10 @@ declaration_specifiers
 
 init_declarator_list
 	: init_declarator {
-		if (!isFuncPushed) {
+		if (isType) {
+			elements.push_type();
+		}
+		else if (!isFuncPushed) {
 			elements.push_back(gGlobal);
 			elements.clear();
 		}
@@ -211,7 +225,9 @@ init_declarator
 	;
 
 storage_class_specifier
-	: TYPEDEF
+	: TYPEDEF {
+		isType = true;
+	}
 	| EXTERN
 	| STATIC
 	| AUTO
@@ -244,7 +260,7 @@ type_specifier
 	| UNSIGNED
 	| struct_or_union_specifier
 	| enum_specifier
-	| TYPE_NAME
+	| TYPE_NAME 
 	;
 
 struct_or_union_specifier
@@ -317,11 +333,16 @@ declarator
 
 direct_declarator
 	: IDENTIFIER   {
-		if (elements.isFind(yylval.identifier, gType)) {
-			yyerror("multiple definition");
+		if (isType) {
+			strncpy(elements.type,  yylval.identifier, 256);
 		}
-		strncpy(elements.localTmp->name, yylval.identifier, 256);
-		elements.localTmp->type = gType;
+		else {
+			if (elements.is_find(yylval.identifier, gType)) {
+				yyerror("multiple definition");
+			}
+			strncpy(elements.localTmp->name, yylval.identifier, 256);
+			elements.localTmp->type = gType;
+		}
 	}
 	| '(' declarator ')'
 	| direct_declarator '[' constant_expression ']'
@@ -331,6 +352,7 @@ direct_declarator
 		elements.push_back(gGlobal);
 		elements.clear();
 		gGlobal = false;
+		isFuncPushed = true;
 	}
 	parameter_type_list ')'
 	| direct_declarator '('  {
@@ -338,6 +360,7 @@ direct_declarator
 		elements.push_back(gGlobal);
 		elements.clear();
 		gGlobal = false;
+		isFuncPushed = true;
 	}
 	identifier_list ')'
 	| direct_declarator '('  {
@@ -441,13 +464,16 @@ labeled_statement
 	;
 
 compound_statement
-	: '{' '}' {
-		
+	: '{' {isFuncPushed = false;} func_definition {
+		elements.init_last();
 	}
-	| '{' statement_list '}'
-	| '{' declaration_list '}'
-	| '{' declaration_list statement_list '}'
 	;
+
+func_definition
+	: '}'
+	| statement_list '}'
+	| declaration_list '}'
+	| declaration_list statement_list '}'
 
 declaration_list
 	: declaration
@@ -493,11 +519,13 @@ translation_unit
 external_declaration
 	: function_definition {
 		gGlobal = true;
-		isFuncPushed = false;
+		isType = isFuncPushed = false;
+		elements.clear_members();
 	}
 	| declaration  {
 		gGlobal = true;
-		isFuncPushed = false;
+		isType = isFuncPushed = false;
+		elements.clear_members();
 	}
 	;
 
@@ -522,10 +550,14 @@ int main(int argc, char** argv) {
 		fprintf(stderr, "usage: %s filename\n", *argv);
 		return -1;
 	}
-	
-	yyin = fopen(*(argv + 1),"r");
+	char * cmd;
+	asprintf(&cmd,"echo \"typedef char* __builtin_va_list;\n\" > tmp.i &"
+			"gcc -E %s >> tmp.i", *(argv + 1));
+	system(cmd);
+	free(cmd);
+	yyin = fopen("tmp.i","r");
 	if (!yyin){
-		fprintf(stderr, "file %s doesn't exist\n", *(argv + 1));
+		fprintf(stderr, "file tmp.i doesn't exist\n");
 		return -1;
 	}
 	
@@ -538,6 +570,12 @@ int main(int argc, char** argv) {
 
 void yyerror(const char *s)
 {
+	printf("\033[1;31m");
 	printf("line %d: %s\n", line, s);
+	printf("\033[0m");
 	exit(0);
+}
+
+bool is_type_name(char * id) {
+	return elements.is_type(id);
 }
