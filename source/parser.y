@@ -210,12 +210,10 @@ init_declarator_list
 		}
 		else if (!isFuncPushed) {
 			elements.push_back(gGlobal);
-			elements.clear();
 		}
 	}
 	| init_declarator_list ',' init_declarator {
 		elements.push_back(gGlobal);
-		elements.clear();
 	}
 	;
 
@@ -352,7 +350,6 @@ direct_declarator
 	| direct_declarator '('  {
 		elements.localTmp->callable = true;
 		elements.push_back(gGlobal);
-		elements.clear();
 		gGlobal = false;
 		isFuncPushed = true;
 	}
@@ -360,7 +357,6 @@ direct_declarator
 	| direct_declarator '('  {
 		elements.localTmp->callable = true;
 		elements.push_back(gGlobal);
-		elements.clear();
 		gGlobal = false;
 		isFuncPushed = true;
 	}
@@ -368,7 +364,6 @@ direct_declarator
 	| direct_declarator '('  {
 		elements.localTmp->callable = true;
 		elements.push_back(gGlobal);
-		elements.clear();
 		gGlobal = false;
 		isFuncPushed = true;
 	} ')'
@@ -396,12 +391,10 @@ parameter_list
 	: parameter_declaration  {
 		elements.localTmp->initialized = true;
 		elements.push_back(gGlobal);
-		elements.clear();
 	}
 	| parameter_list ',' parameter_declaration  {
 		elements.localTmp->initialized = true;
 		elements.push_back(gGlobal);
-		elements.clear();
 	}
 	;
 
@@ -554,7 +547,7 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 	char * cmd;
-	asprintf(&cmd,"echo \"typedef char* __builtin_va_list;\n\" > tmp.i &"
+	asprintf(&cmd, "echo \"typedef char* __builtin_va_list;\n\" > tmp.i &"
 			"gcc -E %s >> tmp.i", *(argv + 1));
 	system(cmd);
 	free(cmd);
@@ -573,7 +566,7 @@ int main(int argc, char** argv) {
 void yyerror(const char *s)
 {
 	printf("\033[1;31m");
-	printf("line %d: %s\n", line, s);
+	printf("error %d: %s\n", line, s);
 	printf("\033[0m");
 	exit(0);
 }

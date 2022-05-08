@@ -57,13 +57,29 @@ List<T>::List() : global(), members(), types() {
 
 template<class T>
 List<T>::~List() {
-	members.clear();
+	clear_members();
+
+	for (auto element = global.begin();
+		element != global.end(); ++element) {
+		free(*element);
+	}
+
+	for (auto element = types.begin();
+		element != types.end(); ++element) {
+		free(*element);
+	}
+
 	free(this->localTmp);
+	free(this->type);
 }
 
 template<class T>
 void List<T>::clear_members() {
 	
+	for (auto element = members.begin();
+		element != members.end(); ++element) {
+		free(*element);
+	}
 	members.clear();
 }
 
@@ -136,10 +152,6 @@ inline bool List<T>::is_type(char *id) {
 	return false;
 }
 template<class T>
-void List<T>::clear() {
-	memset(localTmp, '\0', sizeof(T));
-}
-template<class T>
 void List<T>::push_back(bool isGlobal) {
 
 	T* ptr = (T*)calloc(sizeof(T), sizeof(T));
@@ -149,6 +161,7 @@ void List<T>::push_back(bool isGlobal) {
 	ptr->callable = localTmp->callable;
 	isGlobal ? global.push_back(ptr) :
 		members.push_back(ptr);
+	memset(localTmp, '\0', sizeof(T));
 }
 
 template<class T>
@@ -161,15 +174,13 @@ void List<T>::print() {
 			<< ((*element)->callable ? "callable" : "not callable")
 			<< std::endl;
 	}
-	std::cout 
-		<< '\n' << '\n' << '\n' << '\n' << '\n';
-	//std::cout << "global" << std::endl;
+	std::cout << "global" << std::endl;
 
-	//for (auto element = global.begin();
-	//	element != global.end(); ++element) {
-	//	std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
-	//		<< ((*element)->initialized ? "initialized" : "not initialized") << ", "
-	//		<< ((*element)->callable ? "callable" : "not callable")
-	//		<< std::endl;
-	//}
+	for (auto element = global.begin();
+		element != global.end(); ++element) {
+		std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
+			<< ((*element)->initialized ? "initialized" : "not initialized") << ", "
+			<< ((*element)->callable ? "callable" : "not callable")
+			<< std::endl;
+	}
 }
