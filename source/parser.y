@@ -466,19 +466,13 @@ compound_statement
 
 func_definition
 	: '}'
-	| statement_list '}'
-	| declaration_list '}'
-	| declaration_list statement_list '}'
+	| statement func_definition
+	| declaration func_definition
 	;
 
 declaration_list
 	: declaration
 	| declaration_list declaration
-	;
-
-statement_list
-	: statement
-	| statement_list statement
 	;
 
 expression_statement
