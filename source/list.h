@@ -222,7 +222,8 @@ bool List<T>::is_duplicate() {
 		element != global.end(); ++element) {
 		for (auto duplicate = std::next(element, 1);
 			duplicate != global.end(); ++duplicate) {
-			if (!strcmp((*element)->name, (*duplicate)->name)) {
+			if (!strcmp((*element)->name, (*duplicate)->name) && 
+				(*element)->callable && (*duplicate)->callable) {
 				if ((*element)->initialized) {
 					global.erase(duplicate);
 				}

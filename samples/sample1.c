@@ -852,12 +852,13 @@ int main()
 	current_place(digit[4]);
 	if (level == '1' || level == '2' || level == '3' || level == '4')
 	{
+		int e = 0;
 		while (1)
 		{
 			switch (current)
 			{
 			case 0:
-				for (int e = 0, count = 0; e < 9; e++)
+				for (e = 0, count = 0; e < 9; e++)
 				{
 					count += empty(digit[e]);
 				}
@@ -930,7 +931,7 @@ int main()
 				}
 				while (1)
 				{
-					for (int e = 0, count = 0; e < 9; e++)
+					for (e = 0, count = 0; e < 9; e++)
 					{
 						count += empty(digit[e]);
 					}
@@ -1056,7 +1057,7 @@ int main()
 				{
 					while (1)
 					{
-						for (int e = 0, count = 0; e < 9; e++)
+						for (e = 0, count = 0; e < 9; e++)
 						{
 							count += empty(digit[e]);
 						}
@@ -1167,7 +1168,7 @@ int main()
 					win_conditional(result_digit);
 					while (1)
 					{
-						for (int e = 0, count = 0; e < 9; e++)
+						for (e = 0, count = 0; e < 9; e++)
 						{
 							count += empty(digit[e]);
 						}

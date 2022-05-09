@@ -350,6 +350,7 @@ direct_declarator
 			if (elements.is_find(yylval.identifier, gType)) {
 				char tmp[400];
 				snprintf(tmp, 400, "multiple definition '%s'", yylval.identifier);
+				yyerror(tmp);
 			}
 			strncpy(elements.localTmp->name, yylval.identifier, 256);
 			elements.localTmp->type = gType;
