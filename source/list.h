@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include <list>
+#include <vector>
 
 struct idElem
 {
@@ -29,10 +30,12 @@ class List
 	std::list<T*> global;
 	std::list<T*> members;
 	std::list<char*> types;
+	std::vector<std::vector<T*>> nested;
 
 public:
 	T* localTmp;
 	char * type;
+	long unsigned int level;
 
 	List();
 	~List();
@@ -43,6 +46,8 @@ public:
 
 	void clear();
 	void clear_members();
+	void nested_clear();
+	void up_level();
 	void push_back(bool isGlobal);
 	void push_type();
 	void print();
@@ -50,7 +55,7 @@ public:
 };
 
 template<class T>
-List<T>::List() : global(), members(), types() {
+List<T>::List() : global(), members(), types(), nested(), level(0) {
 	this->localTmp = (T*)calloc(sizeof(T), sizeof(T));
 	this->type = (char*)calloc(256, sizeof(char));
 }
@@ -84,6 +89,19 @@ void List<T>::clear_members() {
 }
 
 template<class T>
+void List<T>::nested_clear() {
+	
+	--level;
+	auto element = nested[level];
+	for (auto element_nested = element.begin();
+		element_nested != element.end(); ++element_nested) {
+		free(*element_nested);
+	}
+	nested[level].clear();
+	nested.pop_back();
+}
+
+template<class T>
 void List<T>::push_type() {
 	char* ptr = (char*)calloc(256, sizeof(T));
 	strncpy(ptr, type, 256);
@@ -99,9 +117,26 @@ void List<T>::init_last() {
 	global.push_back(element);
 }
 
+template<class T> 
+void List<T>::up_level() {
+	
+	++level;
+	nested.push_back(std::vector<T*>());
+}
+
 template<class T>
 inline bool List<T>::is_find(char* id, bool isGlobal)
 {
+	for (auto element = nested.begin();
+		element != nested.end(); ++element) {
+		for (auto element_nested = element->begin();
+			element_nested != element->end(); ++element_nested) {
+			if (!strcmp((*element_nested)->name, id)) {
+				return true;
+			}
+		}
+	}
+
 	for (auto element = members.begin();
 		element != members.end(); ++element) {
 		if (!strcmp((*element)->name, id)) {
@@ -122,6 +157,16 @@ inline bool List<T>::is_find(char* id, bool isGlobal)
 
 template<class T>
 inline bool List<T>::is_init(char *id) {
+
+	for (auto element = nested.begin();
+		element != nested.end(); ++element) {
+		for (auto element_nested = element->begin();
+			element_nested != element->end(); ++element_nested) {
+			if (!strcmp((*element_nested)->name, id)) {
+				return (*element_nested)->initialized;
+			}
+		}
+	}
 
 	for (auto element = members.begin();
 		element != members.end(); ++element) {
@@ -159,14 +204,33 @@ void List<T>::push_back(bool isGlobal) {
 	ptr->type = localTmp->type;
 	ptr->initialized = localTmp->initialized;
 	ptr->callable = localTmp->callable;
-	isGlobal ? global.push_back(ptr) :
-		members.push_back(ptr);
+
+	if (level > 0) {
+		nested[level - 1].push_back(ptr);
+	}
+	else {
+		isGlobal ? global.push_back(ptr) :
+			members.push_back(ptr);
+	}
 	memset(localTmp, '\0', sizeof(T));
 }
 
 template<class T>
 void List<T>::print() {
 
+	std::cout << "nested" << std::endl;
+	for (auto element = nested.begin();
+		element != nested.end(); ++element) {
+		for (auto element_nested = element->begin();
+			element_nested != element->end(); ++element) {
+			std::cout << "id: " << (*element_nested)->name << ", id_type: " << (*element_nested)->type << ", "
+				<< ((*element_nested)->initialized ? "initialized" : "not initialized") << ", "
+				<< ((*element_nested)->callable ? "callable" : "not callable")
+				<< std::endl;
+		}
+	}
+	
+	std::cout << "local" << std::endl;
 	for (auto element = members.begin();
 		element != members.end(); ++element) {
 		std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
@@ -174,13 +238,13 @@ void List<T>::print() {
 			<< ((*element)->callable ? "callable" : "not callable")
 			<< std::endl;
 	}
-	std::cout << "global" << std::endl;
+	//std::cout << "global" << std::endl;
 
-	for (auto element = global.begin();
-		element != global.end(); ++element) {
-		std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
-			<< ((*element)->initialized ? "initialized" : "not initialized") << ", "
-			<< ((*element)->callable ? "callable" : "not callable")
-			<< std::endl;
-	}
+	//for (auto element = global.begin();
+	//	element != global.end(); ++element) {
+	//	std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
+	//		<< ((*element)->initialized ? "initialized" : "not initialized") << ", "
+	//		<< ((*element)->callable ? "callable" : "not callable")
+	//		<< std::endl;
+	//}
 }

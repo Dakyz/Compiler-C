@@ -481,20 +481,49 @@ expression_statement
 	;
 
 selection_statement
-	: IF '(' expression ')' statement
-	| IF '(' expression ')' statement ELSE statement
-	| SWITCH '(' expression ')' statement
+	: IF '(' expression ')' {
+		elements.up_level();
+	} if_body {
+		elements.nested_clear();
+	}
+	| SWITCH '(' expression ')'  {
+		elements.up_level();
+	} statement {
+		elements.nested_clear();
+	}
 	;
+
+if_body
+	: statement 
+	| statement ELSE {
+		elements.nested_clear();
+		elements.up_level();
+	} statement
 
 iteration_statement
-	: WHILE '(' expression ')' statement
-	| DO statement WHILE '(' expression ')' ';'
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
-	| FOR '(' declaration_list expression_statement ')' statement
-	| FOR '(' declaration_list expression_statement expression ')' statement
+	: WHILE '(' expression ')' {
+		elements.up_level();
+	} statement {
+		elements.nested_clear();
+	}
+	| DO {
+		elements.up_level();
+	} statement WHILE '(' expression ')' ';' {
+		elements.nested_clear();
+	}
+	| FOR '(' {
+		elements.up_level();
+	} for_body {
+		elements.nested_clear();
+	}
 	;
 
+for_body
+	: expression_statement expression_statement ')' statement
+	| expression_statement expression_statement expression ')' statement
+	| declaration_list expression_statement ')' statement 
+	| declaration_list expression_statement expression ')' statement 
+	;
 jump_statement
 	: GOTO IDENTIFIER ';'
 	| CONTINUE ';'
@@ -543,7 +572,8 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 	char * cmd;
-	asprintf(&cmd, "echo \"typedef char* __builtin_va_list;\n\" > tmp.i &"
+	asprintf(&cmd, "echo \"typedef float _Float128;\n\" > tmp.i & "
+			"echo \"typedef char* __builtin_va_list;\n\" >> tmp.i & "
 			"gcc -E %s >> tmp.i", *(argv + 1));
 	system(cmd);
 	free(cmd);
@@ -556,6 +586,7 @@ int main(int argc, char** argv) {
 	if(!feof (yyin)) {
 		yyparse();
 	}
+
 	return 0;
 }
 
