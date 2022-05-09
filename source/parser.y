@@ -317,8 +317,18 @@ enumerator_list
 	;
 
 enumerator
-	: IDENTIFIER
-	| IDENTIFIER '=' constant_expression
+	: IDENTIFIER {
+		strncpy(elements.localTmp->name, yylval.identifier, 256);
+		elements.localTmp->type = int_;
+		elements.localTmp->initialized = true;
+		elements.push_back(true);
+	}
+	| IDENTIFIER '=' {
+		strncpy(elements.localTmp->name, yylval.identifier, 256);
+		elements.localTmp->type = int_;
+		elements.localTmp->initialized = true;
+		elements.push_back(true);
+	} constant_expression
 	;
 
 type_qualifier
@@ -338,7 +348,8 @@ direct_declarator
 		}
 		else {
 			if (elements.is_find(yylval.identifier, gType)) {
-				yyerror("multiple definition");
+				char tmp[400];
+				snprintf(tmp, 400, "multiple definition '%s'", yylval.identifier);
 			}
 			strncpy(elements.localTmp->name, yylval.identifier, 256);
 			elements.localTmp->type = gType;
@@ -542,11 +553,13 @@ external_declaration
 		gGlobal = true;
 		isType = isFuncPushed = false;
 		elements.clear_members();
+		elements.is_duplicate();
 	}
 	| declaration  {
 		gGlobal = true;
 		isType = isFuncPushed = false;
 		elements.clear_members();
+		elements.is_duplicate();
 	}
 	;
 
@@ -567,13 +580,13 @@ function_definition
 
 %%
 int main(int argc, char** argv) {
-	if (argc < 2){
+	if (argc < 2) {
 		fprintf(stderr, "usage: %s filename\n", *argv);
 		return -1;
 	}
 	char * cmd;
-	asprintf(&cmd, "echo \"typedef float _Float128;\n\" > tmp.i & "
-			"echo \"typedef char* __builtin_va_list;\n\" >> tmp.i & "
+	asprintf(&cmd, "echo \"typedef float _Float128;\n\" > tmp.i &"
+			"echo \"typedef char* __builtin_va_list;\n\" >> tmp.i &"
 			"gcc -E %s >> tmp.i", *(argv + 1));
 	system(cmd);
 	free(cmd);
@@ -586,15 +599,14 @@ int main(int argc, char** argv) {
 	if(!feof (yyin)) {
 		yyparse();
 	}
-
 	return 0;
 }
 
 void yyerror(const char *s)
 {
-	printf("\033[1;31m");
-	printf("error %d: %s\n", line, s);
-	printf("\033[0m");
+	fprintf(stderr, "\033[1;31m");
+	fprintf(stderr, "error %d: %s\n", line, s);
+	fprintf(stderr, "\033[0m");
 	exit(0);
 }
 

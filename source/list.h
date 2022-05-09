@@ -25,7 +25,7 @@ enum types {
 };
 
 template<class T>
-class List 
+class List
 {
 	std::list<T*> global;
 	std::list<T*> members;
@@ -43,6 +43,7 @@ public:
 	bool is_find(char* id, bool isGlobal);
 	bool is_init(char* id);
 	bool is_type(char* id);
+	bool is_duplicate();
 
 	void clear();
 	void clear_members();
@@ -80,7 +81,7 @@ List<T>::~List() {
 
 template<class T>
 void List<T>::clear_members() {
-	
+
 	for (auto element = members.begin();
 		element != members.end(); ++element) {
 		free(*element);
@@ -90,7 +91,7 @@ void List<T>::clear_members() {
 
 template<class T>
 void List<T>::nested_clear() {
-	
+
 	--level;
 	auto element = nested[level];
 	for (auto element_nested = element.begin();
@@ -110,16 +111,16 @@ void List<T>::push_type() {
 
 template<class T>
 void List<T>::init_last() {
-	
+
 	T* element = global.back();
 	global.pop_back();
 	element->initialized = true;
 	global.push_back(element);
 }
 
-template<class T> 
+template<class T>
 void List<T>::up_level() {
-	
+
 	++level;
 	nested.push_back(std::vector<T*>());
 }
@@ -157,7 +158,6 @@ inline bool List<T>::is_find(char* id, bool isGlobal)
 
 template<class T>
 inline bool List<T>::is_init(char *id) {
-
 	for (auto element = nested.begin();
 		element != nested.end(); ++element) {
 		for (auto element_nested = element->begin();
@@ -216,6 +216,30 @@ void List<T>::push_back(bool isGlobal) {
 }
 
 template<class T>
+bool List<T>::is_duplicate() {
+
+	for (auto element = global.begin();
+		element != global.end(); ++element) {
+		for (auto duplicate = std::next(element, 1);
+			duplicate != global.end(); ++duplicate) {
+			if (!strcmp((*element)->name, (*duplicate)->name)) {
+				if ((*element)->initialized) {
+					global.erase(duplicate);
+				}
+				else if ((*duplicate)->initialized) {
+					global.erase(element);
+				}
+				else {
+					global.erase(duplicate);
+				}
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+template<class T>
 void List<T>::print() {
 
 	std::cout << "nested" << std::endl;
@@ -229,7 +253,7 @@ void List<T>::print() {
 				<< std::endl;
 		}
 	}
-	
+
 	std::cout << "local" << std::endl;
 	for (auto element = members.begin();
 		element != members.end(); ++element) {
@@ -238,13 +262,13 @@ void List<T>::print() {
 			<< ((*element)->callable ? "callable" : "not callable")
 			<< std::endl;
 	}
-	//std::cout << "global" << std::endl;
+	std::cout << "global" << std::endl;
 
-	//for (auto element = global.begin();
-	//	element != global.end(); ++element) {
-	//	std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
-	//		<< ((*element)->initialized ? "initialized" : "not initialized") << ", "
-	//		<< ((*element)->callable ? "callable" : "not callable")
-	//		<< std::endl;
-	//}
+	for (auto element = global.begin();
+		element != global.end(); ++element) {
+		std::cout << "id: " << (*element)->name << ", id_type: " << (*element)->type << ", "
+			<< ((*element)->initialized ? "initialized" : "not initialized") << ", "
+			<< ((*element)->callable ? "callable" : "not callable")
+			<< std::endl;
+	}
 }
