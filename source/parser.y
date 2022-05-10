@@ -585,12 +585,18 @@ int main(int argc, char** argv) {
 		fprintf(stderr, "usage: %s filename\n", *argv);
 		return -1;
 	}
-	char * cmd;
-	asprintf(&cmd, "echo \"typedef float _Float128;\n\" > tmp.i &"
-			"echo \"typedef char* __builtin_va_list;\n\" >> tmp.i &"
-			"gcc -E %s >> tmp.i", *(argv + 1));
-	system(cmd);
-	free(cmd);
+	char * cmd_typedef_float,
+		cmd_typedef__builtin_va_list,
+		cmd_gcc;
+	asprintf(&cmd_typedef_float, "echo \"typedef float _Float128;\n\" > tmp.i");
+	asprintf(&cmd_typedef__builtin_va_list, 
+		"echo \"typedef char* __builtin_va_list;\n\" >> tmp.i");
+	asprintf(&cmd_gcc, "gcc -E %s >> tmp.i", *(argv + 1));
+	
+	system(cmd_typedef_float);
+	system(cmd_typedef__builtin_va_list);
+	system(cmd_gcc);
+	
 	yyin = fopen("tmp.i","r");
 	if (!yyin){
 		fprintf(stderr, "file tmp.i doesn't exist\n");
@@ -600,6 +606,9 @@ int main(int argc, char** argv) {
 	if(!feof (yyin)) {
 		yyparse();
 	}
+	free(cmd_typedef_float);
+	free(cmd_typedef__builtin_va_list);
+	free(cmd_gcc);
 	return 0;
 }
 
