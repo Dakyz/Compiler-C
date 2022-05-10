@@ -45,7 +45,6 @@ public:
 	bool is_type(char* id);
 	bool is_duplicate();
 
-	void clear();
 	void clear_members();
 	void nested_clear();
 	void up_level();

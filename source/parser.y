@@ -586,8 +586,8 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 	char * cmd_typedef_float,
-		cmd_typedef__builtin_va_list,
-		cmd_gcc;
+		 * cmd_typedef__builtin_va_list,
+		 * cmd_gcc;
 	asprintf(&cmd_typedef_float, "echo \"typedef float _Float128;\n\" > tmp.i");
 	asprintf(&cmd_typedef__builtin_va_list, 
 		"echo \"typedef char* __builtin_va_list;\n\" >> tmp.i");
